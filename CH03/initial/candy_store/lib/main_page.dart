@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:candy_store/cart_button.dart';
 import 'package:candy_store/cart_list_item.dart';
 import 'package:candy_store/cart_page.dart';
@@ -17,14 +19,11 @@ class _MainPageState extends State<MainPage> {
 
   // The Map key is the id of the CartListItem. We will use a Map data structure
   // because it is easier to manage the addition, removal & count of the items.
-  final Map<String, CartListItem> cartItemsMap = {};
+ // final Map<String, CartListItem> cartItemsMap = {};
+  ValueNotifier<Map<String, CartListItem>> cartItemsMap = ValueNotifier({});
 
   @override
   Widget build(BuildContext context) {
-    final totalCount = cartItemsMap.values.fold<int>(
-      0,
-      (previousValue, element) => previousValue + element.quantity,
-    );
 
     return Stack(
       children: [
@@ -36,8 +35,17 @@ class _MainPageState extends State<MainPage> {
           bottom: 16,
           child: GestureDetector(
             onTap: openCart,
-            child: CartButton(
-              count: totalCount,
+            child: ValueListenableBuilder(
+              valueListenable: cartItemsMap,
+              builder: (context, items, child) {
+                final totalCount = items.values.fold<int>(
+                  0,
+                      (previousValue, element) => previousValue + element.quantity,
+                );
+                return CartButton(
+                  count: totalCount,
+                );
+              }
             ),
           ),
         ),
@@ -47,37 +55,39 @@ class _MainPageState extends State<MainPage> {
 
   // TODO: Make this implementation more efficient via a Map
   void addToCart(ProductListItem item) {
-    CartListItem? existingItem = cartItemsMap[item.id];
+    CartListItem? existingItem = cartItemsMap.value[item.id];
     if (existingItem != null) {
       existingItem = CartListItem(
         product: existingItem.product,
         quantity: existingItem.quantity + 1,
       );
-      cartItemsMap[item.id] = existingItem;
-      setState(() {});
+      final newCartItemMap = Map<String, CartListItem>.from(cartItemsMap.value);
+      newCartItemMap[item.id] = existingItem;
+      cartItemsMap.value = newCartItemMap;
+     // setState(() {});
     } else {
       setState(() {
         final cartItem = CartListItem(
           product: item,
           quantity: 1,
         );
-        cartItemsMap[item.id] = cartItem;
+        cartItemsMap.value[item.id] = cartItem;
       });
     }
   }
 
   void removeFromCart(CartListItem item) {
-    CartListItem? existingItem = cartItemsMap[item.product.id];
+    CartListItem? existingItem = cartItemsMap.value[item.product.id];
     if (existingItem != null) {
       if (existingItem.quantity > 1) {
         existingItem = CartListItem(
           product: existingItem.product,
           quantity: existingItem.quantity - 1,
         );
-        cartItemsMap[item.product.id] = existingItem;
+        cartItemsMap.value[item.product.id] = existingItem;
         setState(() {});
       } else {
-        cartItemsMap.remove(item.product.id);
+        cartItemsMap.value.remove(item.product.id);
         setState(() {});
       }
     }
@@ -87,7 +97,7 @@ class _MainPageState extends State<MainPage> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => CartPage(
-          items: cartItemsMap.values.toList(),
+          items: cartItemsMap,
           onAddToCart: (item) {
             addToCart(item.product);
           },
