@@ -1,13 +1,12 @@
 import 'package:candy_store/cart_list_item_view.dart';
+import 'package:candy_store/inherited_widgets/cart_provider.dart';
 import 'package:candy_store/notifiers/cart_notifier.dart';
 import 'package:flutter/material.dart';
 
 class CartPage extends StatefulWidget {
-  final CartNotifier cartNotifier;
 
   const CartPage({
     super.key,
-    required this.cartNotifier
   });
 
   @override
@@ -15,6 +14,8 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
+  late CartNotifier cartNotifier;
+
   void _updateCart(){
     setState(() {});
   }
@@ -22,12 +23,22 @@ class _CartPageState extends State<CartPage> {
   @override
   void initState() {
     super.initState();
-    widget.cartNotifier.addListener(_updateCart);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // executes after build
+      cartNotifier = CartProvider.of(context);
+      cartNotifier.addListener(_updateCart);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    cartNotifier = CartProvider.of(context);
+    super.didChangeDependencies();
   }
 
   @override
   void dispose() {
-    widget.cartNotifier.removeListener(_updateCart);
+    cartNotifier.removeListener(_updateCart);
     super.dispose();
   }
 
@@ -38,10 +49,10 @@ class _CartPageState extends State<CartPage> {
         title: const Text('Cart'),
       ),
       body: ListenableBuilder(
-        listenable: widget.cartNotifier,
+        listenable: cartNotifier,
         builder: (context, child) {
-          final values = widget.cartNotifier.items;
-          final totalPrice = widget.cartNotifier.items.fold<double>(0, (previous, element) => previous + element.product.price * element.quantity);
+          final values = cartNotifier.items;
+          final totalPrice = cartNotifier.items.fold<double>(0, (previous, element) => previous + element.product.price * element.quantity);
           return Stack(
             children: [
               Padding(
@@ -53,8 +64,8 @@ class _CartPageState extends State<CartPage> {
                     final item = values[index];
                     return CartListItemView(
                       item: item,
-                      onRemoveFromCart: widget.cartNotifier.removeFromCart,
-                      onAddToCart: (item) => widget.cartNotifier.addToCart(item.product),
+                      onRemoveFromCart: cartNotifier.removeFromCart,
+                      onAddToCart: (item) => cartNotifier.addToCart(item.product),
                     );
                   },
                 ),
