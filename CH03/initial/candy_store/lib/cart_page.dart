@@ -1,20 +1,13 @@
-import 'dart:developer';
-
-import 'package:candy_store/cart_list_item.dart';
 import 'package:candy_store/cart_list_item_view.dart';
+import 'package:candy_store/notifiers/cart_notifier.dart';
 import 'package:flutter/material.dart';
 
 class CartPage extends StatefulWidget {
- // final List<CartListItem> items;
-  final ValueNotifier<Map<String, CartListItem>> items;
-  final Function(CartListItem) onRemoveFromCart;
-  final Function(CartListItem) onAddToCart;
+  final CartNotifier cartNotifier;
 
   const CartPage({
     super.key,
-    required this.items,
-    required this.onRemoveFromCart,
-    required this.onAddToCart,
+    required this.cartNotifier
   });
 
   @override
@@ -22,15 +15,21 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  // List<CartListItem> _items = [];
-  // double _totalPrice = 0;
-  //
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _items = widget.items;
-  //   _calculateTotalPrice();
-  // }
+  void _updateCart(){
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    widget.cartNotifier.addListener(_updateCart);
+  }
+
+  @override
+  void dispose() {
+    widget.cartNotifier.removeListener(_updateCart);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +37,11 @@ class _CartPageState extends State<CartPage> {
       appBar: AppBar(
         title: const Text('Cart'),
       ),
-      body: ValueListenableBuilder(
-        valueListenable: widget.items,
-        builder: (context, items, child) {
-          log("cart list item $items");
-          final values = items.values.toList();
-          final totalPrice = items.values.fold<double>(0, (previous, element) => previous + element.product.price * element.quantity);
+      body: ListenableBuilder(
+        listenable: widget.cartNotifier,
+        builder: (context, child) {
+          final values = widget.cartNotifier.items;
+          final totalPrice = widget.cartNotifier.items.fold<double>(0, (previous, element) => previous + element.product.price * element.quantity);
           return Stack(
             children: [
               Padding(
@@ -55,8 +53,8 @@ class _CartPageState extends State<CartPage> {
                     final item = values[index];
                     return CartListItemView(
                       item: item,
-                      onRemoveFromCart: widget.onRemoveFromCart,
-                      onAddToCart: widget.onAddToCart,
+                      onRemoveFromCart: widget.cartNotifier.removeFromCart,
+                      onAddToCart: (item) => widget.cartNotifier.addToCart(item.product),
                     );
                   },
                 ),
@@ -102,51 +100,4 @@ class _CartPageState extends State<CartPage> {
       ),
     );
   }
-
-  // void _removeFromCart(CartListItem item) {
-  //   setState(() {
-  //     final index = _items.indexWhere(
-  //       (i) => i.product.id == item.product.id,
-  //     );
-  //     if (index != -1) {
-  //       final existingItem = _items[index];
-  //       final newQuantity = existingItem.quantity - 1;
-  //       if (newQuantity > 0) {
-  //         _items[index] = CartListItem(
-  //           product: existingItem.product,
-  //           quantity: newQuantity,
-  //         );
-  //       } else {
-  //         _items.removeAt(index);
-  //       }
-  //     }
-  //     _calculateTotalPrice();
-  //   });
-  //   widget.onRemoveFromCart(item);
-  // }
-  //
-  // void _addToCart(CartListItem item) {
-  //   setState(() {
-  //     final index = _items.indexWhere(
-  //       (i) => i.product.id == item.product.id,
-  //     );
-  //     if (index != -1) {
-  //       final existingItem = _items[index];
-  //       _items[index] = CartListItem(
-  //         product: existingItem.product,
-  //         quantity: existingItem.quantity + 1,
-  //       );
-  //     }
-  //     _calculateTotalPrice();
-  //   });
-  //   widget.onAddToCart(item);
-  // }
-  //
-  // void _calculateTotalPrice() {
-  //   _totalPrice = _items.fold(
-  //     0,
-  //     (previousValue, element) =>
-  //         previousValue + element.product.price * element.quantity,
-  //   );
-  // }
 }
