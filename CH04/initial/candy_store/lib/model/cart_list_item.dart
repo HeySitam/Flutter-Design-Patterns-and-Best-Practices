@@ -1,4 +1,4 @@
-import 'package:candy_store/product_list_item.dart';
+import 'package:candy_store/model/product_list_item.dart';
 
 class CartListItem {
   final ProductListItem product;

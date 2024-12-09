@@ -1,4 +1,4 @@
-import 'package:candy_store/cart_viewmodel.dart';
+import 'package:candy_store/viewmodel/cart_viewmodel.dart';
 import 'package:flutter/material.dart';
 
 class CartViewModelProvider extends InheritedWidget {

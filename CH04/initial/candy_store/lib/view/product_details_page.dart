@@ -1,5 +1,5 @@
-import 'package:candy_store/cart_view_model_provider.dart';
-import 'package:candy_store/product_list_item.dart';
+import 'package:candy_store/viewmodel/cart_view_model_provider.dart';
+import 'package:candy_store/model/product_list_item.dart';
 import 'package:flutter/material.dart';
 
 class ProductDetailsPage extends StatelessWidget {

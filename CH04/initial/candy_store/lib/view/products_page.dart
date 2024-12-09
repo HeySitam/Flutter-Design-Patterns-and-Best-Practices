@@ -1,5 +1,5 @@
-import 'package:candy_store/product_list_item.dart';
-import 'package:candy_store/product_list_item_view.dart';
+import 'package:candy_store/model/product_list_item.dart';
+import 'package:candy_store/view/product_list_item_view.dart';
 import 'package:flutter/material.dart';
 
 class ProductsPage extends StatefulWidget {

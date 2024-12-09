@@ -1,6 +1,6 @@
-import 'package:candy_store/cart_list_item.dart';
-import 'package:candy_store/cart_model.dart';
-import 'package:candy_store/product_list_item.dart';
+import 'package:candy_store/model/cart_list_item.dart';
+import 'package:candy_store/model/cart_model.dart';
+import 'package:candy_store/model/product_list_item.dart';
 import 'package:flutter/foundation.dart';
 
 class CartViewModel extends ChangeNotifier {
