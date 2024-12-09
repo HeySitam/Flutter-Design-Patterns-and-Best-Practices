@@ -1,5 +1,5 @@
 import 'package:candy_store/cart_list_item.dart';
-import 'package:candy_store/cart_notifier_provider.dart';
+import 'package:candy_store/cart_view_model_provider.dart';
 import 'package:flutter/material.dart';
 
 class CartListItemView extends StatelessWidget {
@@ -12,7 +12,7 @@ class CartListItemView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cartNotifier = CartProvider.of(context);
+    final cartNotifier = CartViewModelProvider.of(context);
 
     final product = item.product;
     return Container(

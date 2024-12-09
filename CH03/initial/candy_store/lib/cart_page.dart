@@ -44,6 +44,8 @@ class _CartPageState extends State<CartPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Map<String, int> map1 = {};
+    // List.from(elements)
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cart'),
