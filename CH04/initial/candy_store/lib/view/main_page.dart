@@ -14,12 +14,11 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
-    final cartNotifier = CartViewModelProvider.of(context);
-
+    final cartVM = CartViewModelProvider.of(context);
     return ListenableBuilder(
-      listenable: cartNotifier,
+      listenable: cartVM,
       builder: (context, _) {
-        return Stack(
+        return  Stack(
           children: [
             const ProductsPage(),
             Positioned(
@@ -28,10 +27,13 @@ class _MainPageState extends State<MainPage> {
               child: GestureDetector(
                 onTap: openCart,
                 child: CartButton(
-                  count: cartNotifier.totalItems,
+                  count: cartVM.state.totalItems,
                 ),
               ),
             ),
+            Visibility(
+                visible: cartVM.state.isProcessing,
+                child: Center(child: CircularProgressIndicator()))
           ],
         );
       },

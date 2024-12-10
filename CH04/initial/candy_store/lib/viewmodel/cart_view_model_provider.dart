@@ -20,6 +20,16 @@ class CartViewModelProvider extends InheritedWidget {
     return provider.cartNotifier;
   }
 
+  static CartViewModel read(BuildContext context) {
+    final provider = context.getInheritedWidgetOfExactType<CartViewModelProvider>();
+
+    if (provider == null) {
+      throw 'No CartProvider found in context';
+    }
+
+    return provider.cartNotifier;
+  }
+
   @override
   bool updateShouldNotify(CartViewModelProvider oldWidget) {
     return cartNotifier != oldWidget.cartNotifier;
