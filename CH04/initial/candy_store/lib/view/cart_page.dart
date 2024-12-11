@@ -1,9 +1,10 @@
 import 'dart:developer';
 
+import 'package:candy_store/cubit/cart_cubit.dart';
 import 'package:candy_store/view/cart_list_item_view.dart';
-import 'package:candy_store/viewmodel/cart_view_model_provider.dart';
-import 'package:candy_store/viewmodel/cart_viewmodel.dart';
+import 'package:candy_store/viewmodel/cart_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -13,43 +14,37 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  late final CartViewModel _cartViewModel;
+ // late final CartViewModel _cartViewModel;
+  late final CartCubit _cartCubit;
 
   @override
   void initState() {
     super.initState();
-    _cartViewModel = CartViewModelProvider.read(context);
-    _cartViewModel.addListener(_onCartViewModelStateChanged);
-  }
-
-  void _onCartViewModelStateChanged(){
-    if(_cartViewModel.state.error != null){
-      _cartViewModel.clearError();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_cartViewModel.state.error.toString()))
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _cartViewModel.dispose();
-    super.dispose();
+    _cartCubit = context.read<CartCubit>();
+    _cartCubit.loadCart();
   }
 
   @override
   Widget build(BuildContext context) {
-    final cartNotifier = CartViewModelProvider.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cart'),
       ),
-      body: ListenableBuilder(
-        listenable: _cartViewModel,
-        builder: (context, _) {
-          log("Is Processing : ${_cartViewModel.state.isProcessing}");
-          log("CartVM Items Length : ${_cartViewModel.state.items.length}");
-          if(_cartViewModel.state.isProcessing) {
+      body: BlocConsumer<CartCubit, CartState>(
+        listener: (BuildContext context, CartState state) {
+          if(state.error != null) {
+            _cartCubit.clearError();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Failed to perform this action'),
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          log("Is Processing : ${state.isProcessing}");
+          log("CartVM Items Length : ${state.items.length}");
+          if(state.isProcessing) {
             return const Center(
               child: CircularProgressIndicator(),
             );
@@ -61,9 +56,9 @@ class _CartPageState extends State<CartPage> {
                 padding: const EdgeInsets.only(bottom: 60),
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  itemCount: _cartViewModel.state.items.length,
+                  itemCount: state.items.length,
                   itemBuilder: (context, index) {
-                    final item = _cartViewModel.state.items.values.toList()[index];
+                    final item = state.items.values.toList()[index];
                     return CartListItemView(item: item);
                   },
                 ),
@@ -92,7 +87,7 @@ class _CartPageState extends State<CartPage> {
                         ),
                       ),
                       Text(
-                        '${_cartViewModel.state.totalPrice} €',
+                        '${state.totalPrice} €',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

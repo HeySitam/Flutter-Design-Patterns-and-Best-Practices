@@ -1,8 +1,10 @@
+import 'package:candy_store/cubit/cart_cubit.dart';
 import 'package:candy_store/view/cart_button.dart';
-import 'package:candy_store/viewmodel/cart_view_model_provider.dart';
+import 'package:candy_store/viewmodel/cart_state.dart';
 import 'package:candy_store/view/cart_page.dart';
 import 'package:candy_store/view/products_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -12,12 +14,28 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  late final CartCubit _cartCubit;
+
+  @override
+  void initState() {
+    _cartCubit = context.read<CartCubit>();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final cartVM = CartViewModelProvider.of(context);
-    return ListenableBuilder(
-      listenable: cartVM,
-      builder: (context, _) {
+    return BlocConsumer<CartCubit, CartState>(
+      listener: (context, state) {
+        if(state.error != null) {
+          _cartCubit.clearError();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to perform this action'),
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
         return  Stack(
           children: [
             const ProductsPage(),
@@ -27,12 +45,12 @@ class _MainPageState extends State<MainPage> {
               child: GestureDetector(
                 onTap: openCart,
                 child: CartButton(
-                  count: cartVM.state.totalItems,
+                  count: state.totalItems,
                 ),
               ),
             ),
             Visibility(
-                visible: cartVM.state.isProcessing,
+                visible: state.isProcessing,
                 child: Center(child: CircularProgressIndicator()))
           ],
         );

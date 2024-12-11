@@ -6,7 +6,7 @@ class CartState {
   final int totalItems;
   final bool isProcessing;
   final Exception? error;
-  CartState({
+  const CartState({
     required this.items,
     required this.totalPrice,
     required this.totalItems,
